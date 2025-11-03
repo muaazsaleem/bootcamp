@@ -1,10 +1,7 @@
 use anyhow::{anyhow, Result};
 use std::fs;
 
-use crate::{
-    db,
-    models::{DBState, Epic, Status, Story},
-};
+use crate::models::{DBState, Epic, Status, Story};
 
 pub struct JiraDatabase {
     database: Box<dyn Database>,
