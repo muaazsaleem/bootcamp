@@ -18,6 +18,12 @@ pub trait Page {
 pub struct HomePage {
     pub db: Rc<JiraDatabase>,
 }
+
+impl HomePage {
+    fn is_valid_epic_id(&self, epic_id: u32) -> Result<bool> {
+        Ok(self.db.read_db()?.epics.contains_key(&epic_id))
+    }
+}
 impl Page for HomePage {
     fn draw_page(&self) -> Result<()> {
         println!("----------------------------- EPICS -----------------------------");
@@ -46,7 +52,22 @@ impl Page for HomePage {
     }
 
     fn handle_input(&self, input: &str) -> Result<Option<Action>> {
-        todo!() // match against the user input and return the corresponding action. If the user input was invalid return None.
+        // match against the user input and return the corresponding action. If the user input was invalid return None.
+        if input == "q" {
+            Ok(Some(Action::Exit))
+        } else if input == "c" {
+            Ok(Some(Action::CreateEpic))
+        } else {
+            let Ok(epic_id) = input.parse::<u32>() else {
+                return Ok(None);
+            };
+
+            let Ok(true) = self.is_valid_epic_id(epic_id) else {
+                return Ok(None);
+            };
+
+            Ok(Some(Action::NavigateToEpicDetail { epic_id }))
+        }
     }
 }
 
