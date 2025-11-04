@@ -1,7 +1,22 @@
 use ellipse::Ellipse;
+use unicode_segmentation::UnicodeSegmentation;
 
+/// Formats a string to an exact visual width by padding or truncating.
 pub fn get_column_string(text: &str, width: usize) -> String {
-    todo!() // use the truncate_ellipse function from the ellipse crate
+    let char_len = text.graphemes(true).count();
+    if char_len == width {
+        text.to_string()
+    } else if char_len < width {
+        format!("{}{}", text, " ".repeat(width - char_len))
+    } else {
+        if width == 0 {
+            String::new()
+        } else if width <= 3 {
+            ".".repeat(width)
+        } else {
+            text.truncate_ellipse(width - 3).to_string()
+        }
+    }
 }
 
 #[cfg(test)]
@@ -41,5 +56,5 @@ mod tests {
         assert_eq!(get_column_string(text2, width), "test  ".to_owned());
         assert_eq!(get_column_string(text3, width), "testme".to_owned());
         assert_eq!(get_column_string(text4, width), "tes...".to_owned());
-    } 
+    }
 }
