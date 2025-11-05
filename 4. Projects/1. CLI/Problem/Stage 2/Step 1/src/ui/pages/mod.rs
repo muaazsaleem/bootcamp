@@ -76,6 +76,26 @@ pub struct EpicDetail {
     pub db: Rc<JiraDatabase>,
 }
 
+impl EpicDetail {
+    // this should probably be a method on the Epic/DB model
+    fn is_valid_story_id(&self, epic_id: u32, story_id: u32) -> Result<bool> {
+        let db_state = self.db.read_db()?;
+        let Some(epic) = db_state.epics.get(&epic_id) else {
+            return Ok(false);
+        };
+
+        let true = epic.stories.contains(&story_id) else {
+            return Ok(false);
+        };
+
+        let true = db_state.stories.contains_key(&story_id) else {
+            return Ok(false);
+        };
+
+        return Ok(true);
+    }
+}
+
 impl Page for EpicDetail {
     fn draw_page(&self) -> Result<()> {
         let db_state = self.db.read_db()?;
@@ -87,8 +107,18 @@ impl Page for EpicDetail {
         println!("------------------------------ EPIC ------------------------------");
         println!("  id  |     name     |         description         |    status    ");
 
-        // TODO: print out epic details using get_column_string()
-
+        // print out epic details using get_column_string()
+        let istr = get_column_string(&self.epic_id.to_string(), 6);
+        let nstr = get_column_string(&epic.name, 14);
+        let dstr = get_column_string(&epic.description, 29);
+        let st_str = get_column_string(&epic.status.to_string(), 14);
+        println!(
+            "{id}|{name}|{description}|{status}",
+            id = istr,
+            name = nstr,
+            description = dstr,
+            status = st_str
+        );
         println!();
 
         println!("---------------------------- STORIES ----------------------------");
@@ -96,7 +126,20 @@ impl Page for EpicDetail {
 
         let stories = &db_state.stories;
 
-        // TODO: print out stories using get_column_string(). also make sure the stories are sorted by id
+        // print out stories using get_column_string(). also make sure the stories are sorted by id
+        for (id, story) in stories.iter().sorted_by_key(|(&id, _story)| id) {
+            let istr = get_column_string(&id.to_string(), 6);
+            let nstr = get_column_string(&story.name, 14);
+            let dstr = get_column_string(&story.description, 29);
+            let st_str = get_column_string(&story.status.to_string(), 14);
+            println!(
+                "{id}|{name}|{description}|{status}",
+                id = istr,
+                name = nstr,
+                description = dstr,
+                status = st_str
+            );
+        }
 
         println!();
         println!();
@@ -107,7 +150,35 @@ impl Page for EpicDetail {
     }
 
     fn handle_input(&self, input: &str) -> Result<Option<Action>> {
-        todo!() // match against the user input and return the corresponding action. If the user input was invalid return None.
+        // match against the user input and return the corresponding action. If the user input was invalid return None.
+        if input == "p" {
+            Ok(Some(Action::NavigateToPreviousPage))
+        } else if input == "u" {
+            Ok(Some(Action::UpdateEpicStatus {
+                epic_id: self.epic_id,
+            }))
+        } else if input == "d" {
+            Ok(Some(Action::DeleteEpic {
+                epic_id: self.epic_id,
+            }))
+        } else if input == "c" {
+            Ok(Some(Action::CreateStory {
+                epic_id: self.epic_id,
+            }))
+        } else {
+            let Ok(story_id) = input.parse::<u32>() else {
+                return Ok(None);
+            };
+
+            let Ok(true) = self.is_valid_story_id(self.epic_id, story_id) else {
+                return Ok(None);
+            };
+
+            Ok(Some(Action::NavigateToStoryDetail {
+                epic_id: self.epic_id,
+                story_id,
+            }))
+        }
     }
 }
 
