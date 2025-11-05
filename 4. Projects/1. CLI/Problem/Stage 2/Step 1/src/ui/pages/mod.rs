@@ -128,8 +128,19 @@ impl Page for StoryDetail {
         println!("------------------------------ STORY ------------------------------");
         println!("  id  |     name     |         description         |    status    ");
 
-        // TODO: print out story details using get_column_string()
-
+        // print out story details using get_column_string()
+        let istr = get_column_string(&self.story_id.to_string(), 6);
+        let nstr = get_column_string(&story.name, 14);
+        let dstr = get_column_string(&story.description, 29);
+        // the *.to_string() method on Status seems to call the Display trait impl
+        let ststr = get_column_string(&story.status.to_string(), 14);
+        print!(
+            "{id}|{name}|{description}|{status}",
+            id = istr,
+            name = nstr,
+            description = dstr,
+            status = ststr
+        );
         println!();
         println!();
 
@@ -139,7 +150,21 @@ impl Page for StoryDetail {
     }
 
     fn handle_input(&self, input: &str) -> Result<Option<Action>> {
-        todo!() // match against the user input and return the corresponding action. If the user input was invalid return None.
+        // match against the user input and return the corresponding action. If the user input was invalid return None.
+        if input == "p" {
+            Ok(Some(Action::NavigateToPreviousPage))
+        } else if input == "u" {
+            Ok(Some(Action::UpdateStoryStatus {
+                story_id: self.story_id,
+            }))
+        } else if input == "d" {
+            Ok(Some(Action::DeleteStory {
+                epic_id: self.epic_id,
+                story_id: self.story_id,
+            }))
+        } else {
+            Ok(None)
+        }
     }
 }
 
