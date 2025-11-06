@@ -49,19 +49,19 @@ Story Detail - The story detail page display a single story's details.
 
 Pages will have access to the database so they can query it and render the data in a nicely formatted way.
 
-Pages have two methods, `draw_page()` and `handle_input()`. 
+Pages have two methods, `draw_page()` and `handle_input()`.
 
 `draw_page()` is responsible for rendering the page to standard out. This method will also render a list of actions users can take (ex: navigate to epic detail page, create story, delete epic, etc.)
 
 `handle_input()` is responsible for handling user input and potentially producing an action. The return type is `Result<Option<Action>>` because this function call can fail. If it doesn't fail then it can optionally return an action. Returning `None` means that the user input was invalid.
 
-__Actions__ 
+__Actions__
 
-User actions are represented by the `Action` Enum in `models.rs`. 
+User actions are represented by the `Action` Enum in `models.rs`.
 
 __Prompts__
 
-Prompts are used when more complicated user input is needed. For example, when creating a new epic the user is asked to enter a name and description. 
+Prompts are used when more complicated user input is needed. For example, when creating a new epic the user is asked to enter a name and description.
 
 ## Steps
 
