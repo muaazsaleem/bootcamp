@@ -25,17 +25,29 @@ fn main() {
 
         if let Some(page) = nav.get_current_page() {
             // 2. render page
-            if !page.draw_page().is_ok() {
+            if let Err(e) = page.draw_page() {
+                println!("Error rendering page: {}\nPress any key to continue...", e);
+                wait_for_key_press();
                 break;
             }
             // 3. get user input
             let input = get_user_input();
             // 4. pass input to page's input handler
-            if let Ok(Some(action)) = page.handle_input(&input) {
-                // 5. if the page's input handler returns an action let the navigator process the action
-                nav.handle_action(action);
-            } else {
-                break;
+            match page.handle_input(input.trim()) {
+                Ok(Some(action)) => match nav.handle_action(action) {
+                    Ok(()) => continue,
+                    Err(e) => {
+                        println!("Error handling action: {}\nPress any key to continue...", e);
+                        wait_for_key_press();
+                        break;
+                    }
+                },
+                Ok(None) => continue,
+                Err(e) => {
+                    println!("Error handling input: {}\nPress any key to continue...", e);
+                    wait_for_key_press();
+                    break;
+                }
             }
         } else {
             break;
